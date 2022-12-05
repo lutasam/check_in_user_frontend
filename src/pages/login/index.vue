@@ -7,7 +7,7 @@
           src="../../assets/images/logo.png"
           style="border-radius: 10px; width: 80px; height: 80px"
         />
-        <span class="title">通用中后台管理系统</span>
+        <span class="title">个人健康打卡系统</span>
       </div>
       <div class="right-wrapper">
         <el-form :model="loginForm" :rules="loginRules" ref="loginRef">
@@ -140,7 +140,7 @@
 </template>
 
 <script>
-import { doLogin, doRegister, activeUser } from "../../api/login";
+import { login, applyRegister, activeUser } from "../../api/login";
 export default {
   name: "login",
   data() {
@@ -209,7 +209,7 @@ export default {
             email: this.loginForm.email,
             password: this.loginForm.password,
           };
-          doLogin(params).then((res) => {
+          login(params).then((res) => {
             if (res.code === 200) {
               localStorage.setItem("token", res.data.token);
               this.$router.push("/dashboard");
@@ -235,7 +235,7 @@ export default {
             nickname: this.registerForm.nickname,
             sign: this.registerForm.sign,
           };
-          doRegister(params).then((res) => {
+          applyRegister(params).then((res) => {
             if (res.code === 200) {
               this.$message.success(
                 "注册成功，验证码已发到您的邮箱，请在5分钟内输入验证码激活账号"
@@ -287,7 +287,7 @@ export default {
   width: 70%;
   height: 65%;
   z-index: 9999;
-  opacity: 0.95;
+  opacity: 0.8;
   display: flex;
   flex-direction: row;
 }

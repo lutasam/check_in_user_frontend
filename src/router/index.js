@@ -19,9 +19,19 @@ export default new Router({
           meta: { title: "系统首页" },
         },
         {
-          path: "commodity",
-          component: () => import("../pages/commodity"),
-          meta: { title: "商品管理" },
+          path: "health_checkin",
+          component: () => import("../pages/health_checkin"),
+          meta: { title: "健康打卡" },
+        },
+        {
+          path: "checkin_records",
+          component: () => import("../pages/checkin_records"),
+          meta: { title: "打卡记录" },
+        },
+        {
+          path: "userinfo",
+          component: () => import("../pages/userinfo"),
+          meta: { title: "个人信息管理" },
         },
         {
           path: "table",

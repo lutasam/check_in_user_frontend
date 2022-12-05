@@ -73,8 +73,18 @@ export default {
         },
         {
           icon: "el-icon-location-outline",
-          index: "commodity",
-          title: "商品管理",
+          index: "health_checkin",
+          title: "健康打卡",
+        },
+        {
+          icon: "el-icon-location-outline",
+          index: "checkin_records",
+          title: "打卡记录",
+        },
+        {
+          icon: "el-icon-location-outline",
+          index: "userinfo",
+          title: "个人信息管理",
         },
         {
           icon: "el-icon-notebook-2",
