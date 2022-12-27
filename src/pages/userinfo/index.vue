@@ -1,15 +1,27 @@
 <template>
   <div class="container">
-    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
+    <el-form ref="form" :model="form" label-width="80px" :rules="updateRules">
       <el-form-item label="头像" prop="avatar">
-<!--        <el-upload-->
-<!--            action="https://jsonplaceholder.typicode.com/posts/"-->
-<!--            list-type="picture-card"-->
-<!--            :on-preview="handlePictureCardPreview"-->
-<!--            :on-remove="handleRemove"-->
-<!--        >-->
-<!--          <i class="el-icon-plus"></i>-->
-<!--        </el-upload>-->
+        <el-upload
+            action
+            ref="upload"
+            :http-request="uploadImage"
+            :show-file-list="false"
+            name="image"
+            accept="image/jpeg,image/jpg,image/png"
+            list-type="picture-card"
+            :limit="1"
+            :before-upload="beforeUpload"
+        >
+          <el-image
+              style="width: 145px; height: 145px"
+              :src="form.avatar"
+              alt
+          />
+          <div class="el-upload__tip" slot="tip">
+            只能上传jpg/jpeg/png文件，且不超过1MB
+          </div>
+        </el-upload>
       </el-form-item>
       <el-form-item label="ID" prop="id">
         <el-input v-model="form.id" class="input-wrapper" :disabled="true"></el-input>
@@ -27,58 +39,6 @@
       <el-form-item label="所在部门" prop="department">
         <el-input v-model="form.department" class="input-wrapper" :disabled="true"></el-input>
       </el-form-item>
-<!--      <el-form-item label="毕业学校">-->
-<!--        <el-select v-model="form.school" class="input-wrapper">-->
-<!--          <el-option label="南京航空航天大学" value="nuaa"></el-option>-->
-<!--          <el-option label="南京理工大学" value="nust"></el-option>-->
-<!--        </el-select>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="在校时间">-->
-<!--        <div>-->
-<!--          <el-date-picker-->
-<!--              v-model="form.startDate"-->
-<!--              type="datetime"-->
-<!--              placeholder="入学日期"-->
-<!--              class="input-wrapper"-->
-<!--          />-->
-<!--          <span style="margin: 0 10px;color: #DCDFE6">-</span>-->
-<!--          <el-date-picker-->
-<!--              v-model="form.startDate"-->
-<!--              type="datetime"-->
-<!--              placeholder="离校日期"-->
-<!--              class="input-wrapper"-->
-<!--          />-->
-<!--        </div>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="所学专业">-->
-<!--        <el-cascader :options="options" class="input-wrapper">-->
-<!--          <template slot-scope="{ node, data }">-->
-<!--            <span>{{ data.label }}</span>-->
-<!--            <span v-if="!node.isLeaf">({{ data.children.length }})</span>-->
-<!--          </template>-->
-<!--        </el-cascader>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="必修专业">-->
-<!--        <el-radio-group v-model="form.resource">-->
-<!--          <el-radio label="数据结构"></el-radio>-->
-<!--          <el-radio label="算法"></el-radio>-->
-<!--          <el-radio label="计算机操作系统"></el-radio>-->
-<!--          <el-radio label="数据库系统"></el-radio>-->
-<!--        </el-radio-group>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="选修课">-->
-<!--        <el-checkbox-group v-model="form.type">-->
-<!--          <el-checkbox label="计算机组装与维修" name="type"></el-checkbox>-->
-<!--          <el-checkbox label="企业网安全高级技术" name="type"></el-checkbox>-->
-<!--          <el-checkbox label="计算机网络技术" name="type"></el-checkbox>-->
-<!--        </el-checkbox-group>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="是否在校">-->
-<!--        <el-switch v-model="form.status"></el-switch>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="备注信息">-->
-<!--        <el-input type="textarea" v-model="form.desc" rows="4" style="width: 600px"></el-input>-->
-<!--      </el-form-item>-->
       <el-form-item>
         <el-button type="primary" @click="onSubmit">确定</el-button>
         <el-button @click="onCancel">取消</el-button>
@@ -159,7 +119,7 @@
                   size="large"
                   style="width: 300px"
                   placeholder="邮箱"
-                  prefix-icon="el-icon-lock"
+                  prefix-icon="el-icon-user"
               ></el-input>
             </el-form-item>
             <el-form-item style="margin-top: 30px">
@@ -196,9 +156,14 @@
 </template>
 
 <script>
-import {uploadUserRecord} from "@/api/record";
-import {takeUserInfo} from "@/api/user";
-import {activeChangeUserEmail, applyChangeUserEmail, applyRegister, resetPassword} from "@/api/login";
+import {takeUserInfo, updateUserInfo} from "@/api/user";
+import {
+  activeChangeUserEmail,
+  activeResetPassword,
+  applyChangeUserEmail,
+  resetPassword
+} from "@/api/login";
+import {uploadImage} from "@/api/file";
 
 export default {
   name: "userinfo",
@@ -220,7 +185,7 @@ export default {
     var validateTwoPass = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("密码不能为空"));
-      } else if (value !== this.registerForm.password) {
+      } else if (value !== this.resetPassForm.password) {
         callback(new Error("两次输入密码不一致!"));
       } else {
         callback();
@@ -233,6 +198,7 @@ export default {
         id: "",
         email: "",
         name: "",
+        password: "not null",
         avatar: "",
         department: "",
       },
@@ -246,9 +212,6 @@ export default {
         active_code: "",
       },
       rules: {
-        name: [
-          { required: true, message: "姓名不能为空", trigger: "blur" },
-        ],
         email: [
           { required: true, validator: checkEmail, trigger: "blur" },
           { max: 50, message: "邮箱过长", trigger: "blur" },
@@ -261,55 +224,30 @@ export default {
           { required: true, validator: validateTwoPass, trigger: "blur" },
         ],
       },
-      // options: [
-      //   {
-      //     value: "hk",
-      //     label: "航空学院",
-      //     children: [
-      //       {
-      //         value: "fxqsj",
-      //         label: "飞行棋设计与工程",
-      //       },
-      //       {
-      //         value: "fxqhj",
-      //         label: "飞行器环境与生命保障工程",
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     value: "ny",
-      //     label: "能源与动力学院",
-      //     children: [
-      //       {
-      //         value: "fxqdl",
-      //         label: "飞行器动力工程",
-      //       },
-      //       {
-      //         value: "ny",
-      //         label: "能源与动力工程",
-      //       },
-      //     ],
-      //   },
-      // ],
+      updateRules: {
+        name: [
+          { required: true, message: "姓名不能为空", trigger: "blur" },
+        ],
+      }
     };
   },
   created() {
-    this.loadData();
+    this.loadUserInfo();
   },
   methods: {
     onSubmit() {
       this.$refs["form"].validate((valid) => {
-        if (!valid) {
-          return;
-        } else {
+        if (valid)  {
           let params = {
             email: this.form.email,
             name: this.form.name,
-            avatar: this.form.avatar
+            avatar: this.form.avatar,
+            department: this.form.department
           };
-          uploadUserRecord(params).then((res) => {
+          updateUserInfo(params).then((res) => {
             if (res.code === 200) {
               this.$message.success("更新成功!");
+              this.loadUserInfo();
             } else {
               this.$message.error(res.msg);
             }
@@ -321,7 +259,7 @@ export default {
       this.$refs["resetEmailRef"].validate((valid) => {
         if (valid) {
           let params = {
-            email: this.registerForm.email,
+            email: this.resetEmailForm.email,
           };
           applyChangeUserEmail(params).then((res) => {
             if (res.code === 200) {
@@ -338,7 +276,7 @@ export default {
     onActiveEmail() {
       let params = {
         email: this.resetEmailForm.email,
-        avtive_code: this.resetEmailForm.active_code
+        active_code: this.resetEmailForm.active_code
       };
       activeChangeUserEmail(params).then((res) => {
         if (res.code === 200) {
@@ -353,7 +291,7 @@ export default {
       this.$refs["resetPassRef"].validate((valid) => {
         if (valid) {
           let params = {
-            email: this.resetPassForm.email,
+            email: this.form.email,
           };
           resetPassword(params).then((res) => {
             if (res.code === 200) {
@@ -369,11 +307,11 @@ export default {
     },
     onActivePass() {
       let params = {
-        email: this.resetPassForm.email,
+        email: this.form.email,
         active_code: this.resetPassForm.active_code,
         password: this.resetPassForm.password
       };
-      activeChangeUserEmail(params).then((res) => {
+      activeResetPassword(params).then((res) => {
         if (res.code === 200) {
           this.$message.success("验证成功!");
           this.isResetPassDlgVisiable = false;
@@ -389,14 +327,42 @@ export default {
       this.isResetEmailDlgVisiable = true;
     },
     onCancel() {
-
+      this.loadUserInfo();
     },
-    loadData() {
+    uploadImage(params) {
+      let file = params.file;
+      const formData = new FormData();
+      formData.append("image", file);
+      uploadImage(formData).then((res) => {
+        if (res.code === 200) {
+          this.$message.success("上传成功!");
+          this.form.avatar = res.data.image_url;
+        } else {
+          this.$message.error(res.msg);
+        }
+        this.$refs.upload.clearFiles();
+      });
+    },
+    beforeUpload(file) {
+      const isCorrectFormat =
+          file.type === "image/jpeg" ||
+          file.type === "image/jpg" ||
+          file.type === "image/png";
+      const isLt2M = file.size / 1024 / 1024 < 1;
+
+      if (!isCorrectFormat) {
+        this.$message.error("图片格式错误");
+      }
+      if (!isLt2M) {
+        this.$message.error("图片大小不能超过1MB");
+      }
+      return isCorrectFormat && isLt2M;
+    },
+    loadUserInfo() {
       let params = {};
       takeUserInfo(params).then((res) => {
         if (res.code === 200) {
           this.form = res.data.user;
-          this.$message.success("更新成功!");
         } else {
           this.$message.error(res.msg);
         }

@@ -33,36 +33,6 @@ export default new Router({
           component: () => import("../pages/userinfo"),
           meta: { title: "个人信息管理" },
         },
-        {
-          path: "table",
-          component: () => import("../pages/table"),
-          meta: { title: "基本表格" },
-        },
-        {
-          path: "form",
-          component: () => import("../pages/form"),
-          meta: { title: "复杂表单" },
-        },
-        {
-          path: "form-detail",
-          component: () => import("../pages/form-detail"),
-          meta: { title: "表单详情" },
-        },
-        {
-          path: "markdown",
-          component: () => import("../pages/markdown"),
-          meta: { title: "markdown编辑器" },
-        },
-        {
-          path: "upload",
-          component: () => import("../pages/upload"),
-          meta: { title: "文件上传" },
-        },
-        {
-          path: "charts",
-          component: () => import("../pages/charts"),
-          meta: { title: "vchart图表" },
-        },
       ],
     },
     {

@@ -27,3 +27,7 @@ export function deleteUser(params) {
 export function takeUserInfo(params) {
     return httpUtil.post("api/user/take_user_info", params)
 }
+
+export function findAllAdmins(params) {
+    return httpUtil.post("api/user/find_all_admins", params)
+}

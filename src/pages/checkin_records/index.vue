@@ -1,26 +1,26 @@
 <template>
   <div class="container">
-    <el-form :inline="true" :model="searchFormInline" class="demo-form-inline">
-<!--      <el-form-item label="商品名">-->
-<!--        <el-input v-model="searchFormInline.name" clearable></el-input>-->
-<!--      </el-form-item>-->
-      <!-- <el-form-item label="学校">
-        <el-select v-model="formInline.region" placeholder clearable>
-          <el-option label="南京航空航天大学" value="nuaa"></el-option>
-          <el-option label="南京理工大学" value="nust"></el-option>
-        </el-select>
-      </el-form-item> -->
-<!--      <el-form-item>-->
-<!--        <el-button type="primary" icon="el-icon-search" @click="handleSearch"-->
-<!--          >搜索</el-button-->
-<!--        >-->
-<!--      </el-form-item>-->
-<!--      <el-form-item>-->
-<!--        <el-button type="warning" icon="el-icon-refresh" @click="handleReset"-->
-<!--          >重置</el-button-->
-<!--        >-->
-<!--      </el-form-item>-->
-    </el-form>
+<!--    <el-form :inline="true" :model="searchFormInline" class="demo-form-inline">-->
+<!--&lt;!&ndash;      <el-form-item label="商品名">&ndash;&gt;-->
+<!--&lt;!&ndash;        <el-input v-model="searchFormInline.name" clearable></el-input>&ndash;&gt;-->
+<!--&lt;!&ndash;      </el-form-item>&ndash;&gt;-->
+<!--      &lt;!&ndash; <el-form-item label="学校">-->
+<!--        <el-select v-model="formInline.region" placeholder clearable>-->
+<!--          <el-option label="南京航空航天大学" value="nuaa"></el-option>-->
+<!--          <el-option label="南京理工大学" value="nust"></el-option>-->
+<!--        </el-select>-->
+<!--      </el-form-item> &ndash;&gt;-->
+<!--&lt;!&ndash;      <el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <el-button type="primary" icon="el-icon-search" @click="handleSearch"&ndash;&gt;-->
+<!--&lt;!&ndash;          >搜索</el-button&ndash;&gt;-->
+<!--&lt;!&ndash;        >&ndash;&gt;-->
+<!--&lt;!&ndash;      </el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;      <el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <el-button type="warning" icon="el-icon-refresh" @click="handleReset"&ndash;&gt;-->
+<!--&lt;!&ndash;          >重置</el-button&ndash;&gt;-->
+<!--&lt;!&ndash;        >&ndash;&gt;-->
+<!--&lt;!&ndash;      </el-form-item>&ndash;&gt;-->
+<!--    </el-form>-->
     <el-table
       ref="tableData"
       :data="tableData"
@@ -107,51 +107,24 @@ export default {
           health_code_status: "绿码",
           created_at: "2022-12-05 10:16:43"
         },
-        {
-          id: "1599588546200240128",
-          address: "湖北武汉和平大道1178号",
-          temperature_range: "36°C~37°C之间",
-          is_healthy: true,
-          health_code_status: "红码",
-          created_at: "2022-12-05 10:16:43"
-        },
-        {
-          id: "1599588546200240128",
-          address: "湖北武汉和平大道1178号",
-          temperature_range: "36°C~37°C之间",
-          is_healthy: true,
-          health_code_status: "绿码",
-          created_at: "2022-12-05 10:16:43"
-        },
-        {
-          id: "1599588546200240128",
-          address: "湖北武汉和平大道1178号",
-          temperature_range: "36°C~37°C之间",
-          is_healthy: true,
-          health_code_status: "绿码",
-          created_at: "2022-12-05 10:16:43"
-        },
-        {
-          id: "1599588546200240128",
-          address: "湖北武汉和平大道1178号",
-          temperature_range: "36°C~37°C之间",
-          is_healthy: false,
-          health_code_status: "绿码",
-          created_at: "2022-12-05 10:16:43"
-        },
       ],
       total: 1,
       pageSize: 10,
       currentPage: 1,
     };
   },
+  created() {
+    this.loadData();
+  },
   methods: {
     handleSizeChange(val) {
       // console.log(`每页 ${val} 条`);
+      this.pageSize = val;
       this.loadData();
     },
     handleCurrentChange(val) {
       // console.log(`当前页: ${val}`);
+      this.currentPage = val;
       this.loadData();
     },
     toggleSelection(rows) {

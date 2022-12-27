@@ -93,8 +93,8 @@
                 <i class="el-icon-user" style="color: #6190e8"></i>
               </el-tooltip>
             </div>
-            <div style="font-size: 30px;color: green" v-if="isTodayRecordFinished === true">已完成</div>
-            <div style="font-size: 30px;color: red" v-if="isTodayRecordFinished === false">未完成</div>
+            <div style="font-size: 30px;color: green" v-if="is_today_record_finish === true">已完成</div>
+            <div style="font-size: 30px;color: red" v-if="is_today_record_finish === false">未完成</div>
           </el-card>
         </el-col>
         <el-col :span="6">
@@ -105,7 +105,7 @@
                 <i class="el-icon-document" style="color: #6190e8"></i>
               </el-tooltip>
             </div>
-            <div style="font-size: 30px;color: #515a6e">100次</div>
+            <div style="font-size: 30px;color: #515a6e">{{ this.record_times }}次</div>
           </el-card>
         </el-col>
 <!--        <el-col :span="6">-->
@@ -147,8 +147,13 @@
                 width="180">
             </el-table-column>
             <el-table-column
-                prop="notice"
-                label="通知">
+                prop="admin_name"
+                label="负责人"
+                width="180">
+            </el-table-column>
+            <el-table-column
+                prop="content"
+                label="内容">
             </el-table-column>
           </el-table>
         </el-col>
@@ -174,6 +179,8 @@
 </template>
 
 <script>
+import {takeUserStatistic} from "@/api/statistic";
+
 export default {
   name: "dashboard",
   data() {
@@ -182,20 +189,12 @@ export default {
     //   dimension: ["日期"],
     // };
     return {
-      isTodayRecordFinished: false,
-      recordTimes: 0,
+      is_today_record_finish: false,
+      record_times: 0,
       tableData: [{
         date: '2016-05-02',
-        notice: '请没打卡的同学尽快打卡',
-      }, {
-        date: '2016-05-04',
-        notice: '请没打卡的同学尽快打卡',
-      }, {
-        date: '2016-05-01',
-        notice: '请没打卡的同学尽快打卡',
-      }, {
-        date: '2016-05-03',
-        notice: '请没打卡的同学尽快打卡',
+        admin_name: "超级管理员",
+        content: '请没打卡的同学尽快打卡',
       }]
       // chartData1: {
       //   columns: ["日期", "总订单数", "完成订单数"],
@@ -227,6 +226,24 @@ export default {
       // },
     };
   },
+  created() {
+    this.loadData();
+  },
+  methods: {
+    loadData() {
+      let params = {};
+      takeUserStatistic(params).then((res) => {
+        if (res.code === 200) {
+          this.is_today_record_finish = res.data.is_today_record_finish;
+          this.record_times = res.data.record_times;
+          this.tableData = res.data.notices;
+          localStorage.setItem("record_status", this.is_today_record_finish);
+        } else {
+          this.$message.error(res.msg);
+        }
+      })
+    }
+  }
 };
 </script>
 

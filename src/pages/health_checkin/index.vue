@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
+  <div class="container" >
+    <el-form ref="form" :model="form" label-width="80px" :rules="rules" v-if="record_status === 'false'">
       <el-form-item label="地址" prop="address">
         <el-input v-model="form.address" class="input-wrapper"></el-input>
       </el-form-item>
@@ -15,8 +15,8 @@
       </el-form-item>
       <el-form-item label="健康状态" prop="is_healthy">
         <el-radio-group v-model="form.is_healthy">
-          <el-radio label=true>健康</el-radio>
-          <el-radio label=false>不健康</el-radio>
+          <el-radio label="健康" value="true">健康</el-radio>
+          <el-radio label="不健康" value="false">不健康</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="健康码" prop="health_code_status">
@@ -82,45 +82,51 @@
       <el-form-item label="备注信息" prop="remark">
         <el-input type="textarea" v-model="form.remark" rows="4" style="width: 600px"></el-input>
       </el-form-item>
-      <el-form-item label="附件上传">
+      <el-form-item label="附件上传" prop="appendix">
         <el-upload
-            class="upload-demo"
+            action
+            ref="upload"
+            :http-request="uploadFile"
+            :show-file-list="true"
+            :file-list="filelist"
+            name="file"
             drag
-            action="https://jsonplaceholder.typicode.com/posts/"
-            multiple
-            style="margin: 20px 0"
+            :before-upload="beforeUpload"
+            :on-remove="onRemove"
+            :limit="1"
         >
           <i class="el-icon-upload"></i>
-          <div class="el-upload__text">
-            将文件拖到此处，或
-            <em>点击上传</em>
-          </div>
-          <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <div class="el-upload__tip" slot="tip">上传文件不超过2MB</div>
         </el-upload>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">确定</el-button>
-        <el-button @click="onCancel">>取消</el-button>
+        <el-button @click="onCancel">取消</el-button>
       </el-form-item>
     </el-form>
+    <h1 v-else>今日您已经完成打卡!</h1>
   </div>
 </template>
 
 <script>
 import {uploadUserRecord} from "@/api/record";
+import {uploadFile, uploadImage} from "@/api/file";
 
 export default {
   name: "health_checkin",
   data() {
     return {
+      record_status: null,
       form: {
         address: "",
-        temperature_range: 0,
-        is_healthy: true,
-        health_code_status: 1,
+        temperature_range: null,
+        is_healthy: null,
+        health_code_status: null,
         remark: "",
         appendix: "",
       },
+      filelist: [],
       rules: {
         address: [
           { required: true, message: "地址不能为空", trigger: "blur" },
@@ -136,55 +142,30 @@ export default {
           { required: true, message: "健康状态不能为空", trigger: "blur" },
         ],
       },
-      // options: [
-      //   {
-      //     value: "hk",
-      //     label: "航空学院",
-      //     children: [
-      //       {
-      //         value: "fxqsj",
-      //         label: "飞行棋设计与工程",
-      //       },
-      //       {
-      //         value: "fxqhj",
-      //         label: "飞行器环境与生命保障工程",
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     value: "ny",
-      //     label: "能源与动力学院",
-      //     children: [
-      //       {
-      //         value: "fxqdl",
-      //         label: "飞行器动力工程",
-      //       },
-      //       {
-      //         value: "ny",
-      //         label: "能源与动力工程",
-      //       },
-      //     ],
-      //   },
-      // ],
     };
+  },
+  created() {
+    this.record_status = localStorage.getItem("record_status");
   },
   methods: {
     onSubmit() {
       this.$refs["form"].validate((valid) => {
-        if (!valid) {
-          return;
-        } else {
+        if (valid)  {
+          console.log(this.form.is_healthy);
           let params = {
             address: this.form.address,
-            temperature_range: this.form.temperature_range,
-            is_healthy: this.form.is_healthy,
-            health_code_status: this.form.health_code_status,
+            temperature_range: Number(this.form.temperature_range),
+            is_healthy: this.form.is_healthy === "健康",
+            health_code_status: Number(this.form.health_code_status),
             remark: this.form.remark,
             appendix: this.form.appendix,
           };
+
           uploadUserRecord(params).then((res) => {
             if (res.code === 200) {
               this.$message.success("上传成功!");
+              localStorage.setItem("record_status", "true");
+              location.reload();
             } else {
               this.$message.error(res.msg);
             }
@@ -194,6 +175,30 @@ export default {
     },
     onCancel() {
 
+    },
+    uploadFile(params) {
+      let file = params.file;
+      const formData = new FormData();
+      formData.append("file", file);
+      uploadFile(formData).then((res) => {
+        if (res.code === 200) {
+          this.$message.success("上传成功!");
+          this.form.appendix = res.data.filename;
+        } else {
+          this.$message.error(res.msg);
+        }
+        // this.$refs.upload.clearFiles();
+      });
+    },
+    beforeUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        this.$message.error("图片大小不能超过2MB");
+      }
+      return isLt2M;
+    },
+    onRemove() {
+      this.form.appendix = "";
     }
   },
 };

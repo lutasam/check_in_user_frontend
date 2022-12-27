@@ -67,59 +67,24 @@ export default {
       collapse: false,
       items: [
         {
-          icon: "el-icon-location-outline",
+          icon: "el-icon-s-home",
           index: "dashboard",
           title: "系统首页",
         },
         {
-          icon: "el-icon-location-outline",
+          icon: "el-icon-upload",
           index: "health_checkin",
           title: "健康打卡",
         },
         {
-          icon: "el-icon-location-outline",
+          icon: "el-icon-s-order",
           index: "checkin_records",
           title: "打卡记录",
         },
         {
-          icon: "el-icon-location-outline",
+          icon: "el-icon-user",
           index: "userinfo",
           title: "个人信息管理",
-        },
-        {
-          icon: "el-icon-notebook-2",
-          index: "table",
-          title: "基础表格",
-        },
-        {
-          icon: "el-icon-reading",
-          index: "form",
-          title: "表单相关",
-          subs: [
-            {
-              index: "form",
-              title: "基本表单",
-            },
-            {
-              index: "form-detail",
-              title: "表单详情",
-            },
-          ],
-        },
-        {
-          icon: "el-icon-tickets",
-          index: "markdown",
-          title: "markdown编辑器",
-        },
-        {
-          icon: "el-icon-upload",
-          index: "upload",
-          title: "文件上传",
-        },
-        {
-          icon: "el-icon-pie-chart",
-          index: "charts",
-          title: "vchart图表",
         },
       ],
     };
